@@ -1,4 +1,233 @@
-# Mini ORM
+# Mini ORM - Laravel Eloquent Benzeri ORM Kütüphanesi
+
+Mini ORM, Laravel Eloquent'e benzer şekilde tasarlanmış, sıfırdan geliştirilmiş bir PHP ORM kütüphanesidir. Bu proje, nesne yönelimli mimari, fluent query builder, güvenli SQL oluşturma ve ilişkisel veritabanı desteği sunar.
+
+## 🚀 Özellikler
+
+- **Fluent Query Builder**: Zincirleme metodlarla sorgu oluşturma
+- **Temel CRUD İşlemleri**: Create, Read, Update, Delete
+- **İlişkisel Destekler**: HasOne, HasMany, BelongsTo, BelongsToMany
+- **SQL Injection Güvenliği**: Parametrik sorgular
+- **Model-based Yaklaşım**: Abstract base sınıf desteği
+- **Kolay Genişletilebilirlik**: SOLID prensiplere uygun yapı
+
+## 📁 Proje Yapısı
+
+```
+mini-orm/
+├── src/
+│   ├── Database.php            # PDO bağlantı yöneticisi
+│   ├── QueryBuilder.php        # Fluent query builder
+│   ├── Model.php               # Abstract model sınıfı
+│   ├── Models/
+│   │   ├── User.php            # Örnek User modeli
+│   │   └── Post.php            # Örnek Post modeli
+│   └── Relations/
+│       ├── Relation.php        # Base ilişki sınıfı
+│       ├── HasOne.php          # Tek-tek ilişki
+│       ├── HasMany.php         # Bir-çok ilişki
+│       ├── BelongsTo.php       # Ters tek-tek ilişki
+│       └── BelongsToMany.php   # Çok-çok ilişki
+├── tests/
+│   └── ModelTest.php           # PHPUnit testleri
+├── database.sql                # Veritabanı şeması
+├── example.php                 # Kullanım örneği
+├── docker-compose.yml          # Docker konfigürasyonu
+├── Dockerfile.php              # PHP Docker image
+└── README.md
+```
+
+## 🔧 Kurulum
+
+### Docker ile Kurulum (Önerilen)
+
+1. Projeyi klonlayın:
+```bash
+git clone https://github.com/mevlutcelik/mini-orm.git
+cd mini-orm
+```
+
+2. Docker containerları başlatın:
+```bash
+docker-compose up -d
+```
+
+3. Composer bağımlılıklarını yükleyin:
+```bash
+composer install
+```
+
+4. Veritabanı şemasını oluşturun:
+```bash
+docker-compose exec -T mysql mysql -u root -proot testdb < database.sql
+```
+
+### Manuel Kurulum
+
+1. PHP 7.4+ ve MySQL 8.0+ yüklü olduğundan emin olun
+2. Composer ile bağımlılıkları yükleyin: `composer install`
+3. `database.sql` dosyasını MySQL'de çalıştırın
+4. `src/Database.php` dosyasında veritabanı bağlantı ayarlarını yapılandırın
+
+## 📖 Kullanım
+
+### Temel CRUD İşlemleri
+
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+use MiniOrm\Database;
+use MiniOrm\Models\User;
+
+// Database bağlantısını konfigüre et
+Database::setConfig([
+    'host' => 'localhost',
+    'database' => 'testdb',
+    'username' => 'root',
+    'password' => 'root'
+]);
+
+// Create - Yeni kullanıcı oluştur
+$user = User::create([
+    'name' => 'Ali Veli',
+    'email' => 'ali@example.com',
+    'age' => 25
+]);
+
+// Read - Kullanıcı bul
+$user = User::find(1);
+$user = User::where('email', 'ali@example.com')->first();
+
+// Update - Kullanıcı güncelle
+User::update(1, ['name' => 'Ali Veli Güncellenmiş']);
+
+// Delete - Kullanıcı sil
+User::delete(1);
+```
+
+### Fluent Query Builder
+
+```php
+// Zincirleme sorgular
+$users = User::where('status', 'active')
+             ->where('age', '>', 18)
+             ->orderBy('created_at', 'desc')
+             ->limit(10)
+             ->get();
+
+// Aggregate fonksiyonlar
+$count = User::count();
+$exists = User::where('status', 'active')->exists();
+$firstUser = User::first();
+```
+
+### Model Tanımlama
+
+```php
+<?php
+namespace MiniOrm\Models;
+
+use MiniOrm\Model;
+
+class Product extends Model
+{
+    protected string $table = 'products';
+    protected array $fillable = ['name', 'price', 'description'];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+}
+```
+
+### İlişkiler
+
+```php
+// HasMany - Bir kullanıcının birden fazla postu
+$user = User::find(1);
+$posts = $user->posts()->getResults();
+
+// BelongsTo - Bir postun sahibi
+$post = Post::find(1);
+$owner = $post->user()->getResults();
+
+// HasOne - Kullanıcının profili
+$profile = $user->profile()->getResults();
+
+// BelongsToMany - Çok-çok ilişki
+$user = User::find(1);
+$roles = $user->roles()->getResults();
+```
+
+### Bağımsız QueryBuilder Kullanımı
+
+```php
+use MiniOrm\QueryBuilder;
+
+$queryBuilder = new QueryBuilder('users');
+$results = $queryBuilder
+    ->select(['name', 'email'])
+    ->where('age', '>', 25)
+    ->orderBy('name', 'asc')
+    ->limit(5)
+    ->get();
+```
+
+## 🧪 Test Etme
+
+```bash
+# PHPUnit testlerini çalıştır
+./vendor/bin/phpunit
+
+# Örnek dosyayı çalıştır
+docker-compose exec php php example.php
+```
+
+## 🏗️ Mimari
+
+### SOLID Prensipleri
+
+- **Single Responsibility**: Her sınıf tek bir sorumluluğa sahip
+- **Open/Closed**: Genişletmeye açık, değişikliğe kapalı
+- **Liskov Substitution**: Alt sınıflar üst sınıfların yerine geçebilir
+- **Interface Segregation**: Küçük ve spesifik arayüzler
+- **Dependency Inversion**: Soyutlamalara bağımlılık
+
+### Güvenlik
+
+- Tüm SQL sorguları parametrik (prepared statements)
+- SQL injection saldırılarına karşı koruma
+- Input validation ve sanitization
+
+### Performans
+
+- Lazy loading desteği
+- Efficient query building
+- Connection pooling ready
+
+## 🤝 Katkıda Bulunma
+
+1. Fork edin
+2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
+3. Değişikliklerinizi commit edin (`git commit -m 'Add some amazing feature'`)
+4. Branch'e push edin (`git push origin feature/amazing-feature`)
+5. Pull Request oluşturun
+
+## 📄 Lisans
+
+Bu proje MIT lisansı altında lisanslanmıştır.
+
+## 📞 İletişim
+
+- **Geliştirici**: [Mevlut Celik](https://github.com/mevlutcelik)
+- **Proje Linki**: [https://github.com/mevlutcelik/mini-orm](https://github.com/mevlutcelik/mini-orm)
 
 Laravel Eloquent'e benzer, sıfırdan geliştirilmiş PHP tabanlı mini ORM kütüphanesi.
 
