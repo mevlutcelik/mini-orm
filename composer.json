@@ -2,6 +2,13 @@
     "name": "mini-orm/core",
     "description": "A mini ORM library similar to Laravel Eloquent",
     "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mevlüt Çelik",
+            "email": "23mevlutcelik@gmail.com"
+        }
+    ],
     "require": {
         "php": ">=7.4"
     },
