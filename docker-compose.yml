@@ -11,6 +11,7 @@ services:
     depends_on:
       - mysql
     command: tail -f /dev/null
+    # Web server için: php -S 0.0.0.0:8000 -t .
 
   mysql:
     image: mysql:8.0
