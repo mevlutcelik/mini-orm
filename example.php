@@ -21,8 +21,8 @@ try {
     // 1. Kullanıcı oluşturma
     echo "1. Kullanıcı oluşturma:\n";
     $user = User::create([
-        'name' => 'Ali Veli',
-        'email' => 'ali@example.com',
+        'name' => 'Yeni Kullanıcı ' . time(),
+        'email' => 'yeni' . time() . '@example.com',
         'age' => 25,
         'status' => 'active'
     ]);
@@ -62,7 +62,7 @@ try {
     echo "5. İlişki sorguları:\n";
     $post = Post::find(1);
     if ($post) {
-        $postUser = $post->user();
+        $postUser = $post->user()->getResults();
         if ($postUser) {
             echo "Post sahibi: " . $postUser->name . "\n";
         }
@@ -71,7 +71,7 @@ try {
     // 6. Kullanıcının postları
     $user = User::find(1);
     if ($user) {
-        $userPosts = $user->posts();
+        $userPosts = $user->posts()->getResults();
         echo "Kullanıcının post sayısı: " . count($userPosts) . "\n\n";
     }
 

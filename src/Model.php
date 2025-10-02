@@ -285,7 +285,7 @@ abstract class Model
         return $this->primaryKey;
     }
 
-    protected static function newFromArray(array $attributes): static
+    public static function newFromArray(array $attributes): static
     {
         $model = new static();
         $model->attributes = $attributes;
