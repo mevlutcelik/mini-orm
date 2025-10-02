@@ -1,0 +1,21 @@
+{
+    "name": "mini-orm/core",
+    "description": "A mini ORM library similar to Laravel Eloquent",
+    "type": "library",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MiniOrm\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MiniOrm\\Tests\\": "tests/"
+        }
+    }
+}
